@@ -1,0 +1,54 @@
+security:
+    password_hashers:
+        App\Entity\Utilisateur:
+            algorithm: auto
+
+    providers:
+        utilisateur_provider:
+            entity:
+                class: App\Entity\Utilisateur
+                property: matricule
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: utilisateur_provider
+            jwt: ~
+
+    role_hierarchy:
+        ROLE_CHEF_SERVICE: ROLE_EMPLOYE
+        ROLE_ADMIN_RH: ROLE_CHEF_SERVICE
+
+    access_control:
+        # Routes publiques
+        - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/logout, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/(mot-de-passe-oublie|reinitialiser-mot-de-passe)$, roles: PUBLIC_ACCESS }
+
+        # Routes réservées à l'administrateur RH
+        - { path: ^/api/employees, roles: ROLE_ADMIN_RH }
+        - { path: ^/api/services$, roles: ROLE_ADMIN_RH, methods: [POST] }
+        - { path: ^/api/services/\d+$, roles: ROLE_ADMIN_RH, methods: [PUT, DELETE] }
+        - { path: ^/api/horaires$, roles: ROLE_ADMIN_RH, methods: [POST] }
+        - { path: ^/api/horaires/\d+$, roles: ROLE_ADMIN_RH, methods: [PUT, DELETE] }
+        - { path: ^/api/rapports, roles: ROLE_ADMIN_RH }
+
+        # Routes réservées au chef de service (et RH, via la hiérarchie)
+        - { path: ^/api/dashboard, roles: ROLE_CHEF_SERVICE }
+        - { path: ^/api/conges/\d+/(approuver|refuser)$, roles: ROLE_CHEF_SERVICE, methods: [PUT] }
+        - { path: ^/api/absences, roles: ROLE_CHEF_SERVICE }
+
+        # Toutes les autres routes /api nécessitent au minimum un compte employé authentifié
+        - { path: ^/api, roles: ROLE_EMPLOYE }
+
+when@test:
+    security:
+        password_hashers:
+            App\Entity\Utilisateur:
+                algorithm: auto
+                cost: 4 # hachage rapide pour accélérer les tests
