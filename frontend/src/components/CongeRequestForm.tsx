@@ -14,6 +14,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { useCreateConge } from '../hooks/useConges';
+
 const congeSchema = z
   .object({
     typeConge: z.enum(['conge_annuel', 'permission', 'absence_justifiee']),
@@ -25,7 +26,9 @@ const congeSchema = z
     message: 'La date de fin doit être postérieure ou égale à la date de début.',
     path: ['dateFin'],
   });
+
 type CongeFormValues = z.infer<typeof congeSchema>;
+
 const typeConfig: Record<
   CongeFormValues['typeConge'],
   { label: string; description: string; icon: React.ComponentType<{ className?: string }> }
@@ -46,13 +49,15 @@ const typeConfig: Record<
     icon: FileText,
   },
 };
+
 const quickMotifs = [
-  "Congés annuels",
-  "Obligation familiale",
-  "Rendez-vous médical",
-  "Déménagement",
-  "Repos récupérateur",
+  'Congés annuels',
+  'Obligation familiale',
+  'Rendez-vous médical',
+  'Déménagement',
+  'Repos récupérateur',
 ];
+
 function countBusinessDays(startDateStr: string, endDateStr: string): number {
   try {
     const start = new Date(startDateStr);
@@ -71,9 +76,11 @@ function countBusinessDays(startDateStr: string, endDateStr: string): number {
     return 0;
   }
 }
+
 export function CongeRequestForm() {
   const createConge = useCreateConge();
   const [serverMessage, setServerMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -85,13 +92,16 @@ export function CongeRequestForm() {
     resolver: zodResolver(congeSchema),
     defaultValues: { typeConge: 'conge_annuel', dateDebut: '', dateFin: '', motif: '' },
   });
+
   const selectedType = watch('typeConge');
   const dateDebut = watch('dateDebut');
   const dateFin = watch('dateFin');
+
   let workingDays = 0;
   if (dateDebut && dateFin && dateFin >= dateDebut) {
     workingDays = countBusinessDays(dateDebut, dateFin);
   }
+
   const onSubmit = async (values: CongeFormValues) => {
     setServerMessage(null);
     try {
@@ -113,15 +123,16 @@ export function CongeRequestForm() {
       });
     }
   };
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="card-modern p-6 sm:p-8 space-y-6"
+      className="card-modern p-6 sm:p-9 space-y-7 bg-white rounded-2xl border border-slate-200/90 shadow-xl shadow-slate-900/5"
       noValidate
     >
-      <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-          <CalendarDays className="w-5 h-5" />
+      <div className="flex items-center gap-3.5 pb-5 border-b border-slate-100">
+        <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-800 flex items-center justify-center border border-emerald-200/70 shadow-xs">
+          <CalendarDays className="w-5 h-5 text-emerald-700" />
         </div>
         <div>
           <h2 className="text-lg font-bold text-slate-900 brand-title">
@@ -132,41 +143,43 @@ export function CongeRequestForm() {
           </p>
         </div>
       </div>
+
       {/* Type selection pills */}
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2.5">
           1. Motif d'absence
         </label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           {(Object.keys(typeConfig) as Array<CongeFormValues['typeConge']>).map((typeKey) => {
             const config = typeConfig[typeKey];
             const Icon = config.icon;
             const isSelected = selectedType === typeKey;
+
             return (
               <button
                 key={typeKey}
                 type="button"
                 onClick={() => setValue('typeConge', typeKey, { shouldValidate: true })}
-                className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`p-4 rounded-xl border text-left transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? 'border-blue-600 bg-blue-50/50 shadow-sm shadow-blue-500/10 ring-2 ring-blue-600/20'
-                    : 'border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/50'
+                    ? 'border-emerald-600 bg-emerald-50/60 shadow-sm shadow-emerald-900/5 ring-2 ring-emerald-600/20'
+                    : 'border-slate-200/90 hover:border-slate-300 bg-white hover:bg-slate-50/60'
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2.5">
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-xs ${
+                      isSelected ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-500'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4.5 h-4.5" />
                   </div>
-                  {isSelected && <CheckCircle2 className="w-4 h-4 text-blue-600" />}
+                  {isSelected && <CheckCircle2 className="w-5 h-5 text-emerald-700" />}
                 </div>
                 <div>
                   <p
-                    className={`text-sm font-semibold ${
-                      isSelected ? 'text-blue-950' : 'text-slate-800'
+                    className={`text-sm font-bold ${
+                      isSelected ? 'text-emerald-950' : 'text-slate-800'
                     }`}
                   >
                     {config.label}
@@ -184,70 +197,64 @@ export function CongeRequestForm() {
 
       {/* Dates selection */}
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2.5">
           2. Période demandée
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               Date de début
             </label>
-            <div className="relative">
-              <input
-                type="date"
-                className="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-slate-100/50 focus:bg-white rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
-                {...register('dateDebut')}
-              />
-            </div>
+            <input
+              type="date"
+              className="w-full h-11 px-3.5 bg-slate-50/60 hover:bg-white focus:bg-white rounded-xl border border-slate-200/90 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700/15 focus:border-emerald-700 transition-all cursor-pointer"
+              {...register('dateDebut')}
+            />
             {errors.dateDebut && (
-              <p className="text-xs text-rose-600 mt-1 font-medium">{errors.dateDebut.message}</p>
+              <p className="text-xs text-rose-600 mt-1.5 font-semibold">{errors.dateDebut.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               Date de fin
             </label>
-            <div className="relative">
-              <input
-                type="date"
-                className="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-slate-100/50 focus:bg-white rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
-                {...register('dateFin')}
-              />
-            </div>
+            <input
+              type="date"
+              className="w-full h-11 px-3.5 bg-slate-50/60 hover:bg-white focus:bg-white rounded-xl border border-slate-200/90 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700/15 focus:border-emerald-700 transition-all cursor-pointer"
+              {...register('dateFin')}
+            />
             {errors.dateFin && (
-              <p className="text-xs text-rose-600 mt-1 font-medium">{errors.dateFin.message}</p>
+              <p className="text-xs text-rose-600 mt-1.5 font-semibold">{errors.dateFin.message}</p>
             )}
           </div>
         </div>
       </div>
 
       {workingDays > 0 && (
-        <div className="p-4 rounded border border-emerald-200 bg-emerald-50 text-emerald-950 text-xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 font-semibold">
-              <Calculator className="w-4 h-4 text-blue-600" />
+        <div className="p-4 rounded-xl border border-emerald-200/80 bg-emerald-50/80 text-emerald-950 text-xs shadow-xs animate-enter">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span className="flex items-center gap-2 font-medium">
+              <Calculator className="w-4 h-4 text-emerald-700" />
               <span>
-                Du <strong>{dateDebut}</strong> au <strong>{dateFin}</strong> (hors week-ends)
+                Du <strong>{dateDebut}</strong> au <strong>{dateFin}</strong> (hors samedis et dimanches)
               </span>
             </span>
-            <span className="font-extrabold bg-blue-600 text-white px-2.5 py-1 rounded-full text-xs">
+            <span className="font-extrabold bg-emerald-700 text-white px-3 py-1 rounded-full text-xs self-start sm:self-auto shadow-xs">
               {workingDays} jour{workingDays > 1 ? 's ouvrés décomptés' : ' ouvré décompté'}
             </span>
           </div>
-
         </div>
       )}
 
       {/* Motif & Quick Tags */}
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
           3. Motif ou précisions
         </label>
 
-        {/* Quick click tags (Bizneo HR inspiration) */}
-        <div className="flex items-center gap-1.5 flex-wrap mb-2">
-          <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+        <div className="flex items-center gap-1.5 flex-wrap mb-2.5">
+          <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1 mr-1">
             <Tag className="w-3 h-3" /> Suggestions :
           </span>
           {quickMotifs.map((tag) => (
@@ -255,7 +262,7 @@ export function CongeRequestForm() {
               key={tag}
               type="button"
               onClick={() => setValue('motif', tag, { shouldValidate: true })}
-              className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200/80 transition-colors cursor-pointer"
+              className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 text-slate-600 hover:text-slate-900 border border-slate-200/70 active:scale-95 transition-all cursor-pointer font-medium"
             >
               {tag}
             </button>
@@ -264,42 +271,42 @@ export function CongeRequestForm() {
 
         <textarea
           rows={3}
-          placeholder="Précisez un motif particulier ou des informations pour votre responsable..."
-          className="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-slate-100/50 focus:bg-white rounded-xl border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all resize-none"
+          placeholder="Précisez un motif particulier ou des informations complémentaires pour votre responsable..."
+          className="w-full p-3.5 bg-slate-50/60 hover:bg-white focus:bg-white rounded-xl border border-slate-200/90 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/15 focus:border-emerald-700 transition-all resize-none"
           {...register('motif')}
         />
         {errors.motif && (
-          <p className="text-xs text-rose-600 mt-1 font-medium">{errors.motif.message}</p>
+          <p className="text-xs text-rose-600 mt-1.5 font-semibold">{errors.motif.message}</p>
         )}
       </div>
 
       {/* Feedback banner */}
       {serverMessage && (
         <div
-          className={`p-4 rounded-xl text-xs flex items-start gap-3 border ${
+          className={`p-4 rounded-xl text-xs flex items-start gap-3 border shadow-xs animate-enter ${
             serverMessage.type === 'success'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-              : 'bg-rose-50 border-rose-200 text-rose-800'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+              : 'bg-rose-50 border-rose-200 text-rose-900'
           }`}
         >
           {serverMessage.type === 'success' ? (
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
           ) : (
             <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
           )}
-          <p className="font-medium mt-0.5">{serverMessage.text}</p>
+          <p className="font-semibold mt-0.5">{serverMessage.text}</p>
         </div>
       )}
 
       {/* Submit button */}
-      <div className="flex justify-end pt-2 border-t border-slate-100">
+      <div className="flex justify-end pt-3 border-t border-slate-100">
         <button
           type="submit"
           disabled={createConge.isPending}
-          className="btn-primary w-full sm:w-auto disabled:opacity-50"
+          className="btn-primary w-full sm:w-auto px-6 py-3 rounded-xl font-bold shadow-xs"
         >
-          <Send className="w-4 h-4" />
-          {createConge.isPending ? 'Envoi en cours...' : 'Transmettre la demande pour validation'}
+          <Send className="w-4 h-4 text-emerald-200" />
+          <span>{createConge.isPending ? 'Envoi en cours...' : 'Transmettre pour validation'}</span>
         </button>
       </div>
     </form>

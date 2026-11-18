@@ -15,11 +15,12 @@ import { EmployesPage } from './pages/admin-rh/EmployesPage';
 import { RapportsPage } from './pages/admin-rh/RapportsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { LandingPage } from './pages/LandingPage';
 import { useAuth } from './hooks/useAuth';
 import { getHomePath } from './types/auth';
 function DefaultRoute() {
   const { user } = useAuth();
-  return <Navigate to={user ? getHomePath(user.role) : '/connexion'} replace />;
+  return user ? <Navigate to={getHomePath(user.role)} replace /> : <LandingPage />;
 }
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             {/* Route publique */}
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/connexion" element={<LoginPage />} />
             <Route path="/mot-de-passe-oublie" element={<PasswordRecoveryPage />} />
             <Route path="/confidentialite" element={<PrivacyPage />} />

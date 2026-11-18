@@ -17,12 +17,15 @@ import { useServiceOptions } from '../../hooks/useReferenceData';
 import { EmployeTable } from '../../components/EmployeTable';
 import { EmployeFormModal, type EmployeFormValues } from '../../components/EmployeFormModal';
 import type { Employe, EmployeCreatePayload, EmployeStatut, EmployeUpdatePayload } from '../../types/employe';
+
 function toOptionalNumber(value?: string): number | undefined {
   return value ? Number(value) : undefined;
 }
+
 function toOptionalString(value?: string): string | undefined {
   return value && value.trim() !== '' ? value : undefined;
 }
+
 export function EmployesPage() {
   const [search, setSearch] = useState('');
   const [serviceFilter, setServiceFilter] = useState('');
@@ -33,6 +36,7 @@ export function EmployesPage() {
   const [temporaryPassword, setTemporaryPassword] = useState<{ matricule: string; password: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [pendingDeactivation, setPendingDeactivation] = useState<Employe | null>(null);
+
   const listParams = useMemo(
     () => ({
       q: search || undefined,
@@ -43,15 +47,19 @@ export function EmployesPage() {
     }),
     [search, serviceFilter, statutFilter, page]
   );
+
   const { data, isLoading, isFetching, isError, refetch } = useEmployesList(listParams);
   const { data: services } = useServiceOptions();
+
   const createMutation = useCreateEmploye();
   const updateMutation = useUpdateEmploye();
   const deactivateMutation = useDeactivateEmploye();
+
   const closeModal = () => {
     setModalState(null);
     setFormError(null);
   };
+
   const handleSubmit = async (values: EmployeFormValues) => {
     setFormError(null);
     try {
@@ -89,11 +97,13 @@ export function EmployesPage() {
       setFormError(error instanceof Error ? error.message : 'Une erreur est survenue.');
     }
   };
+
   const confirmDeactivation = async () => {
     if (!pendingDeactivation) return;
     await deactivateMutation.mutateAsync(pendingDeactivation.id);
     setPendingDeactivation(null);
   };
+
   const copyPassword = () => {
     if (temporaryPassword) {
       navigator.clipboard.writeText(temporaryPassword.password);
@@ -101,72 +111,84 @@ export function EmployesPage() {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
   const hasActiveFilters = Boolean(search || serviceFilter || statutFilter);
+
   const resetFilters = () => {
     setSearch('');
     setServiceFilter('');
     setStatutFilter('');
     setPage(1);
   };
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 animate-enter">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <UserCog className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center border border-emerald-200/70 shadow-xs">
+            <UserCog className="w-5 h-5 text-emerald-700" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 brand-title">
-              Gestion du Personnel
-            </h1>
-            <p className="text-sm text-slate-500">
-              Administrez les fiches collaborateurs, affectations et comptes d'accès.
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 brand-title">
+                Gestion des Collaborateurs
+              </h1>
+              <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                Annuaire RH
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Administrez les fiches des employés, affectations de service, horaires et comptes utilisateurs.
             </p>
           </div>
         </div>
+
         <button
           onClick={() => setModalState({ mode: 'create', employe: null })}
-          className="btn-primary self-start sm:self-auto"
+          className="btn-primary self-start sm:self-auto py-2.5 px-4 rounded-xl shadow-xs"
         >
-          <UserPlus className="w-4 h-4" />
-          Nouveau collaborateur
+          <UserPlus className="w-4 h-4 text-emerald-200" />
+          <span>Nouveau collaborateur</span>
         </button>
       </div>
-      {/* Filter and Search Bar */}
-      <div className="filter-strip py-3 space-y-3">
+
+      {/* Filter and Search Bar Card */}
+      <div className="card-modern p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-3.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-blue-600" />
-            Recherche & Filtres
+            <Filter className="w-3.5 h-3.5 text-emerald-700" />
+            Recherche & Filtres rapides
           </span>
           {hasActiveFilters && (
             <button
               onClick={resetFilters}
-              className="text-xs text-blue-600 hover:text-blue-800 font-medium inline-flex items-center gap-1 cursor-pointer"
+              className="text-xs text-emerald-800 hover:text-emerald-950 font-bold inline-flex items-center gap-1.5 cursor-pointer active:scale-95 transition-transform"
             >
               <RotateCcw className="w-3 h-3" />
               Réinitialiser
             </button>
           )}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           {/* Search keyword */}
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
               <Search className="w-4 h-4" />
             </div>
             <input
               type="text"
-              placeholder="Rechercher par nom, prénom, matricule..."
+              placeholder="Rechercher par nom, matricule..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full pl-9 pr-3.5 py-2 bg-slate-50 hover:bg-slate-100/50 focus:bg-white rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+              className="w-full h-10 pl-10 pr-3.5 bg-slate-50/60 hover:bg-white focus:bg-white rounded-xl border border-slate-200/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700/15 focus:border-emerald-700 transition-all"
             />
           </div>
+
           {/* Service filter */}
           <div>
             <select
@@ -175,9 +197,9 @@ export function EmployesPage() {
                 setServiceFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full px-3 py-2 bg-slate-50 hover:bg-slate-100/50 focus:bg-white rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
+              className="w-full h-10 px-3.5 bg-slate-50/60 hover:bg-white focus:bg-white rounded-xl border border-slate-200/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700/15 focus:border-emerald-700 transition-all cursor-pointer"
             >
-              <option value="">Tous les services</option>
+              <option value="">Tous les départements & services</option>
               {services?.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.nom}
@@ -185,6 +207,7 @@ export function EmployesPage() {
               ))}
             </select>
           </div>
+
           {/* Statut filter */}
           <div>
             <select
@@ -193,28 +216,29 @@ export function EmployesPage() {
                 setStatutFilter(e.target.value as EmployeStatut | '');
                 setPage(1);
               }}
-              className="w-full px-3 py-2 bg-slate-50 hover:bg-slate-100/50 focus:bg-white rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
+              className="w-full h-10 px-3.5 bg-slate-50/60 hover:bg-white focus:bg-white rounded-xl border border-slate-200/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700/15 focus:border-emerald-700 transition-all cursor-pointer"
             >
-              <option value="">Tous les statuts</option>
-              <option value="actif">Actif</option>
+              <option value="">Tous les statuts d'activité</option>
+              <option value="actif">Actif uniquement</option>
               <option value="inactif">Inactif</option>
               <option value="suspendu">Suspendu</option>
             </select>
           </div>
         </div>
       </div>
+
       {/* Table */}
       {isError ? (
-        <div role="alert" className="flex flex-col gap-3 border-y border-rose-200 bg-rose-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div role="alert" className="card-modern rounded-2xl border border-rose-200 bg-rose-50/70 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-rose-900">Impossible de charger les collaborateurs</p>
-            <p className="mt-0.5 text-xs text-rose-800">Vérifiez votre connexion puis relancez le chargement.</p>
+            <p className="text-sm font-bold text-rose-950">Impossible de charger les collaborateurs</p>
+            <p className="mt-0.5 text-xs text-rose-700">Vérifiez la connexion avec l'API puis réessayez.</p>
           </div>
           <button
             type="button"
             onClick={() => void refetch()}
             disabled={isFetching}
-            className="btn-secondary shrink-0 disabled:opacity-50"
+            className="btn-secondary text-xs"
           >
             {isFetching ? 'Chargement…' : 'Réessayer'}
           </button>
@@ -227,12 +251,13 @@ export function EmployesPage() {
           onDeactivate={(employe) => setPendingDeactivation(employe)}
         />
       )}
+
       {/* Pagination */}
       {data && data.meta.totalPages > 1 && (
         <div className="flex items-center justify-between pt-2 px-1 text-xs text-slate-500">
           <span className="font-medium">
-            Page {data.meta.page} sur {data.meta.totalPages} ({data.meta.total} collaborateurs)
-            {isFetching && <span className="text-blue-600 ml-1.5 animate-pulse">· actualisation...</span>}
+            Page <strong className="text-slate-800">{data.meta.page}</strong> sur <strong className="text-slate-800">{data.meta.totalPages}</strong> ({data.meta.total} collaborateurs)
+            {isFetching && <span className="text-emerald-700 ml-1.5 animate-pulse">· mise à jour...</span>}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -254,6 +279,7 @@ export function EmployesPage() {
           </div>
         </div>
       )}
+
       {/* Modal Form */}
       {modalState && (
         <EmployeFormModal
@@ -265,50 +291,53 @@ export function EmployesPage() {
           onClose={closeModal}
         />
       )}
+
       {/* Temporary Password Reveal Modal */}
       {temporaryPassword && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5" />
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-enter">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-full max-w-md p-7 space-y-5">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-800 flex items-center justify-center border border-emerald-200/70 shadow-xs">
+                <ShieldCheck className="w-6 h-6 text-emerald-700" />
               </div>
               <div>
                 <h2 className="text-base font-bold text-slate-900 brand-title">
                   Compte créé avec succès
                 </h2>
-                <p className="text-xs text-slate-500">
-                  Matricule : <strong className="text-slate-800">{temporaryPassword.matricule}</strong>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Matricule : <strong className="text-slate-900 font-mono">{temporaryPassword.matricule}</strong>
                 </p>
               </div>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
-              <p className="text-xs text-slate-500 font-medium">Mot de passe temporaire généré :</p>
+
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-2.5">
+              <p className="text-xs text-slate-500 font-medium">Mot de passe temporaire unique généré :</p>
               <div className="flex items-center justify-center gap-2">
-                <span className="font-mono text-lg font-bold text-slate-900 tracking-wider bg-white px-3 py-1 rounded-lg border border-slate-200">
+                <span className="font-mono text-xl font-extrabold text-slate-900 tracking-wider bg-white px-4 py-1.5 rounded-xl border border-slate-200/90 shadow-xs">
                   {temporaryPassword.password}
                 </span>
                 <button
                   type="button"
                   onClick={copyPassword}
                   title="Copier le mot de passe"
-                  className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-slate-50 transition-colors"
+                  className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-emerald-800 hover:bg-emerald-50 transition-all active:scale-95 shadow-xs cursor-pointer"
                 >
-                  {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  {copied ? <Check className="w-4.5 h-4.5 text-emerald-600" /> : <Copy className="w-4.5 h-4.5" />}
                 </button>
               </div>
             </div>
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-              <p className="leading-snug">
-                Ce mot de passe ne sera <strong>plus jamais réaffiché</strong>. Transmettez-le au
-                collaborateur qui devra obligatoirement le modifier dès sa première connexion.
+
+            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-950 text-xs flex items-start gap-2.5 shadow-xs">
+              <AlertTriangle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
+              <p className="leading-relaxed">
+                Ce mot de passe ne sera <strong>plus jamais réaffiché</strong>. Transmettez-le au collaborateur. Il sera invité à le changer dès son premier accès.
               </p>
             </div>
+
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => setTemporaryPassword(null)}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors cursor-pointer"
+                className="btn-primary w-full sm:w-auto px-6 py-2.5 rounded-xl"
               >
                 J'ai bien noté le mot de passe
               </button>
@@ -316,12 +345,13 @@ export function EmployesPage() {
           </div>
         </div>
       )}
+
       {/* Deactivation Confirmation Modal */}
       {pendingDeactivation && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5" />
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-enter">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-full max-w-sm p-6 space-y-4">
+            <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200/60 shadow-xs">
+              <AlertTriangle className="w-6 h-6" />
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 brand-title">
@@ -329,23 +359,22 @@ export function EmployesPage() {
               </h2>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                 <strong>{pendingDeactivation.prenom} {pendingDeactivation.nom}</strong> ne pourra plus
-                se connecter ni pointer. L'historique complet des pointages et congés reste conservé
-                dans la base de données.
+                accéder à l'application ni pointer. L'historique complet est conservé en base.
               </p>
             </div>
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
               <button
                 onClick={() => setPendingDeactivation(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition-colors"
+                className="btn-secondary py-2 px-3.5 rounded-xl text-xs"
               >
                 Annuler
               </button>
               <button
                 onClick={confirmDeactivation}
                 disabled={deactivateMutation.isPending}
-                className="px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm shadow-rose-500/20 disabled:opacity-50 transition-all cursor-pointer"
+                className="btn-danger py-2 px-4 rounded-xl text-xs shadow-xs"
               >
-                {deactivateMutation.isPending ? 'Désactivation...' : 'Désactiver le compte'}
+                {deactivateMutation.isPending ? 'Désactivation...' : 'Confirmer la désactivation'}
               </button>
             </div>
           </div>

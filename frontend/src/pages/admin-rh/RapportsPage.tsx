@@ -11,6 +11,7 @@ import {
 import { useRapportPresence } from '../../hooks/useRapports';
 import { useServiceOptions } from '../../hooks/useReferenceData';
 import { rapportService } from '../../services/rapportService';
+
 function toCsv(rows: { [key: string]: string | number | null }[]): string {
   if (rows.length === 0) return '';
   const headers = Object.keys(rows[0]);
@@ -27,6 +28,7 @@ function toCsv(rows: { [key: string]: string | number | null }[]): string {
   }
   return lines.join('\n');
 }
+
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -35,9 +37,11 @@ function downloadBlob(blob: Blob, filename: string) {
   link.click();
   URL.revokeObjectURL(url);
 }
+
 function downloadCsv(content: string, filename: string) {
   downloadBlob(new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' }), filename);
 }
+
 function toLocalDateString(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -72,7 +76,7 @@ export function RapportsPage() {
     [dateDebut, dateFin, serviceFilter]
   );
 
-  const { data, isLoading, isFetching, isError, refetch } = useRapportPresence(
+  const { data, isLoading, isError, refetch } = useRapportPresence(
     params,
     hasSearched && !isDateRangeInvalid
   );
@@ -120,64 +124,69 @@ export function RapportsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 animate-enter">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <FileBarChart className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center border border-emerald-200/70 shadow-xs">
+            <FileBarChart className="w-5 h-5 text-emerald-700" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 brand-title">
-              Rapports de Présence & Exports
-            </h1>
-            <p className="text-sm text-slate-500">
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 brand-title">
+                Rapports de Présence & Exports
+              </h1>
+              <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                Analytique RH
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
               Générez des synthèses d'activité consolidées et téléchargez-les au format CSV, PDF ou Excel.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Generation & Filter Toolbar */}
-      <div className="filter-strip py-3 space-y-4">
+      {/* Generation & Filter Toolbar Card */}
+      <div className="card-modern p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-[11px] font-semibold text-slate-700 uppercase mb-1">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               Date de début
             </label>
             <input
               type="date"
               value={dateDebut}
               onChange={(e) => setDateDebut(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 hover:bg-slate-100/50 focus:bg-white rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
+              className="w-full h-10 px-3 bg-slate-50/60 hover:bg-white focus:bg-white rounded-xl border border-slate-200/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700/15 focus:border-emerald-700 transition-all cursor-pointer"
             />
             {isDateRangeInvalid && (
-              <p className="mt-1 text-xs text-rose-700" role="alert">
+              <p className="mt-1 text-xs text-rose-700 font-semibold" role="alert">
                 La date de fin doit être égale ou postérieure à la date de début.
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-slate-700 uppercase mb-1">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               Date de fin
             </label>
             <input
               type="date"
               value={dateFin}
               onChange={(e) => setDateFin(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 hover:bg-slate-100/50 focus:bg-white rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
+              className="w-full h-10 px-3 bg-slate-50/60 hover:bg-white focus:bg-white rounded-xl border border-slate-200/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700/15 focus:border-emerald-700 transition-all cursor-pointer"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-slate-700 uppercase mb-1">
-              Service concerné
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+              Service ou département
             </label>
             <select
               value={serviceFilter}
               onChange={(e) => setServiceFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 hover:bg-slate-100/50 focus:bg-white rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
+              className="w-full h-10 px-3 bg-slate-50/60 hover:bg-white focus:bg-white rounded-xl border border-slate-200/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700/15 focus:border-emerald-700 transition-all cursor-pointer"
             >
               <option value="">Tous les services</option>
               {services?.map((s) => (
@@ -196,27 +205,27 @@ export function RapportsPage() {
               if (!isDateRangeInvalid) setHasSearched(true);
             }}
             disabled={isDateRangeInvalid}
-            className="btn-primary disabled:opacity-50"
+            className="btn-primary py-2.5 px-5 rounded-xl shadow-xs"
           >
-            <Search className="w-3.5 h-3.5" />
-            Générer la synthèse
+            <Search className="w-4 h-4 text-emerald-200" />
+            <span>Générer la synthèse</span>
           </button>
 
           {data && data.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2.5 flex-wrap">
               <button
                 onClick={handleExport}
                 disabled={isDateRangeInvalid}
-                className="btn-secondary disabled:opacity-50"
+                className="btn-secondary py-2 px-3.5 rounded-xl text-xs shadow-xs"
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-3.5 h-3.5 text-slate-500" />
                 Format CSV
               </button>
 
               <button
                 onClick={handleDownloadPdf}
                 disabled={downloadingFormat !== null || isDateRangeInvalid}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-rose-800 bg-rose-50 hover:bg-rose-100/80 border border-rose-200/80 transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-xs"
               >
                 <FileText className="w-3.5 h-3.5 text-rose-600" />
                 {downloadingFormat === 'pdf' ? 'Génération...' : 'Télécharger PDF'}
@@ -225,9 +234,9 @@ export function RapportsPage() {
               <button
                 onClick={handleDownloadExcel}
                 disabled={downloadingFormat !== null || isDateRangeInvalid}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/80 transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-xs"
               >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-700" />
                 {downloadingFormat === 'excel' ? 'Génération...' : 'Télécharger Excel'}
               </button>
             </div>
@@ -236,136 +245,135 @@ export function RapportsPage() {
       </div>
 
       {downloadError && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2.5 shadow-xs animate-enter">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-          <span className="font-medium">{downloadError}</span>
+          <span className="font-semibold">{downloadError}</span>
         </div>
       )}
 
       {/* Results Table */}
       {hasSearched && !isDateRangeInvalid && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {isLoading ? (
-            <div className="border-y border-slate-200 bg-white p-8 text-center" role="status" aria-live="polite">
-              <div className="w-8 h-8 border-3 border-blue-600/20 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-xs font-medium text-slate-500">Calcul du rapport en cours...</p>
+            <div className="card-modern rounded-2xl border border-slate-200/80 bg-white p-12 text-center shadow-xs" role="status" aria-live="polite">
+              <div className="w-8 h-8 border-3 border-emerald-600/20 border-t-emerald-700 rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-xs font-semibold text-slate-500">Calcul des données du rapport en cours...</p>
             </div>
           ) : isError ? (
-            <div role="alert" className="flex flex-col gap-3 border border-rose-200 bg-rose-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div role="alert" className="card-modern rounded-2xl border border-rose-200 bg-rose-50/70 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <h3 className="text-sm font-semibold text-rose-900">Le rapport n’a pas pu être chargé</h3>
-                <p className="mt-1 text-xs text-rose-800">
-                  Vérifiez la période et votre connexion, puis relancez la génération.
+                <h3 className="text-sm font-bold text-rose-950">Le rapport n’a pas pu être chargé</h3>
+                <p className="mt-0.5 text-xs text-rose-700">
+                  Vérifiez la période choisie puis relancez la génération.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => void refetch()}
-                className="shrink-0 rounded border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-100"
+                className="btn-secondary text-xs"
               >
                 Réessayer
               </button>
             </div>
           ) : !data || data.length === 0 ? (
-            <div className="border-y border-slate-200 bg-white p-8 text-center">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+            <div className="card-modern rounded-2xl border border-slate-200/80 bg-white p-12 text-center shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 shadow-xs">
                 <Calendar className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-semibold text-slate-800">Aucune donnée trouvée</h3>
-              <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                Aucun enregistrement de présence pour la période et les filtres sélectionnés.
+              <h3 className="text-sm font-bold text-slate-900 brand-title">Aucune donnée trouvée</h3>
+              <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
+                Aucun pointage ni heure de travail pour la période et les filtres sélectionnés.
               </p>
             </div>
           ) : (
-            <div className="card-modern overflow-hidden border border-slate-200/90 shadow-sm">
+            <div className="card-modern overflow-hidden bg-white rounded-2xl border border-slate-200/80 shadow-xs">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-slate-100 text-sm">
                   <thead>
-                    <tr className="bg-slate-50/80">
-                      <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <tr className="bg-slate-50/70">
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                         Employé
                       </th>
-                      <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                         Service
                       </th>
-                      <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                         Jours présents
                       </th>
-                      <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                         Retards
                       </th>
-                      <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                         Départs anticipés
                       </th>
-                      <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                         Total retard
                       </th>
-                      <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                         Heures sup.
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100/80">
                     {data.map((r) => (
-                      <tr key={r.employeId} className="hover:bg-blue-50/30 transition-colors">
+                      <tr key={r.employeId} className="hover:bg-slate-50/70 transition-colors">
                         <td className="px-5 py-3.5 whitespace-nowrap">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded bg-brand text-white font-semibold text-xs flex items-center justify-center">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-800 to-teal-900 text-white font-bold text-xs flex items-center justify-center shadow-xs">
                               {r.prenom[0]}
                               {r.nom[0]}
                             </div>
-                            <span className="font-semibold text-slate-900">
+                            <span className="font-bold text-slate-900">
                               {r.prenom} {r.nom}
                             </span>
                           </div>
                         </td>
 
-                        <td className="px-5 py-3.5 whitespace-nowrap text-xs text-slate-600">
+                        <td className="px-5 py-3.5 whitespace-nowrap text-xs text-slate-600 font-medium">
                           {r.service ?? '—'}
                         </td>
 
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <span className="font-bold text-slate-800">{r.joursPresents}</span>
-                          <span className="text-xs text-slate-400 ml-1">jours</span>
+                        <td className="px-5 py-3.5 whitespace-nowrap font-mono font-bold text-slate-900">
+                          {r.joursPresents} <span className="text-xs font-normal text-slate-400 font-sans">j</span>
                         </td>
 
-                        <td className="px-5 py-3.5 whitespace-nowrap text-xs text-slate-700">
+                        <td className="px-5 py-3.5 whitespace-nowrap">
                           {r.nbRetards > 0 ? (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200/80">
                               {r.nbRetards}
                             </span>
                           ) : (
-                            '0'
+                            <span className="text-xs text-slate-400">0</span>
                           )}
                         </td>
 
-                        <td className="px-5 py-3.5 whitespace-nowrap text-xs text-slate-700">
+                        <td className="px-5 py-3.5 whitespace-nowrap">
                           {r.nbDepartsAnticipes > 0 ? (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-50 text-orange-800 border border-orange-200/80">
                               {r.nbDepartsAnticipes}
                             </span>
                           ) : (
-                            '0'
+                            <span className="text-xs text-slate-400">0</span>
                           )}
                         </td>
 
-                        <td className="px-5 py-3.5 whitespace-nowrap text-xs font-mono text-slate-700">
+                        <td className="px-5 py-3.5 whitespace-nowrap font-mono text-slate-700">
                           {r.totalRetardMinutes > 0 ? (
-                            <span className="text-amber-600 font-semibold">
+                            <span className="text-amber-700 font-bold">
                               {r.totalRetardMinutes} min
                             </span>
                           ) : (
-                            '0 min'
+                            <span className="text-slate-400">0 min</span>
                           )}
                         </td>
 
-                        <td className="px-5 py-3.5 whitespace-nowrap text-xs font-mono">
+                        <td className="px-5 py-3.5 whitespace-nowrap font-mono">
                           {r.totalHsMinutes > 0 ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200/80">
                               +{r.totalHsMinutes} min
                             </span>
                           ) : (
-                            '0 min'
+                            <span className="text-slate-400 text-xs">0 min</span>
                           )}
                         </td>
                       </tr>
@@ -373,11 +381,6 @@ export function RapportsPage() {
                   </tbody>
                 </table>
               </div>
-              {isFetching && (
-                <div className="px-4 py-2 bg-slate-50 text-[11px] text-blue-600 border-t border-slate-100 flex items-center gap-1.5 animate-pulse">
-                  <span>Actualisation des calculs...</span>
-                </div>
-              )}
             </div>
           )}
         </div>

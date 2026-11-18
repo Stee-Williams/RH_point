@@ -1,50 +1,62 @@
 import { useState } from 'react';
-import { History, ChevronLeft, ChevronRight } from 'lucide-react';
+import { History, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { PointageWidget } from '../../components/PointageWidget';
 import { PointageHistoryTable } from '../../components/PointageHistoryTable';
 import { usePointagesList } from '../../hooks/usePointage';
+
 export function PointagePage() {
   const [page, setPage] = useState(1);
   const { data, isLoading, isFetching, isError, refetch } = usePointagesList({ page, limit: 10 });
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-8 animate-enter">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 brand-title">
-              Pointage & Présence
-            </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center border border-emerald-200/60 shadow-xs">
+            <Clock className="w-5 h-5 text-emerald-700" />
           </div>
-          <p className="text-sm text-slate-500 mt-1">
-            Enregistrez votre prise de poste et consultez l'historique complet de vos pointages.
-          </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 brand-title">
+                Pointage & Présence
+              </h1>
+              <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                Temps réel
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Enregistrez vos prises de poste quotidiennes et consultez l'historique complet de votre assiduité.
+            </p>
+          </div>
         </div>
       </div>
+
       <div className="max-w-2xl mx-auto">
         <PointageWidget />
       </div>
+
       {/* History Section */}
-      <div className="space-y-3 pt-2">
+      <div className="space-y-4 pt-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-emerald-50 text-emerald-800 flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
               <History className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900 brand-title">
+              <h2 className="text-base font-bold text-slate-900 brand-title">
                 Historique de mes pointages
               </h2>
-              <p className="text-xs text-slate-500">
-                {data ? `${data.meta.total} pointage(s) enregistré(s)` : 'Chargement...'}
+              <p className="text-[11px] text-slate-400">
+                {data ? `${data.meta.total} enregistrement(s)` : 'Chargement...'}
               </p>
             </div>
           </div>
         </div>
 
         {isError ? (
-          <div role="alert" className="flex flex-col gap-3 border-y border-rose-200 bg-rose-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-rose-900">Impossible de charger l’historique des pointages.</p>
+          <div role="alert" className="flex flex-col gap-3 rounded-2xl border border-rose-200 bg-rose-50/70 p-4 sm:flex-row sm:items-center sm:justify-between shadow-xs">
+            <p className="text-sm font-semibold text-rose-900">Impossible de charger l’historique des pointages.</p>
             <button
               type="button"
               onClick={() => void refetch()}
@@ -59,10 +71,10 @@ export function PointagePage() {
         )}
 
         {data && data.meta.totalPages > 1 && (
-          <div className="flex items-center justify-between pt-2 px-1 text-xs text-slate-500">
+          <div className="flex items-center justify-between pt-3 px-1 text-xs text-slate-500">
             <span className="font-medium">
-              Page {data.meta.page} sur {data.meta.totalPages}
-              {isFetching && <span className="text-blue-600 ml-1.5 animate-pulse">· mise à jour...</span>}
+              Page <strong className="text-slate-800">{data.meta.page}</strong> sur <strong className="text-slate-800">{data.meta.totalPages}</strong>
+              {isFetching && <span className="text-emerald-700 ml-1.5 animate-pulse">· actualisation...</span>}
             </span>
 
             <div className="flex items-center gap-2">
